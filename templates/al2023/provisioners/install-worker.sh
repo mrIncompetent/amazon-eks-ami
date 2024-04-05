@@ -237,3 +237,16 @@ sudo chown -R root:root /etc/eks
 sudo sed -i \
   's/ - package-update-upgrade-install/# Removed so that nodes do not have version skew based on when the node was started.\n# - package-update-upgrade-install/' \
   /etc/cloud/cloud.cfg
+
+################################################################################
+### Install kata-containers ####################################################
+################################################################################
+
+
+sudo mkdir /opt/kata
+# TODO: Change URL to use the correct architecture
+sudo curl -L -o /opt/kata/kata.tar.xz https://github.com/kata-containers/kata-containers/releases/download/3.3.0/kata-static-3.3.0-arm64.tar.xz
+#curl -L -o /opt/kata/kata.tar.xz https://github.com/kata-containers/kata-containers/releases/download/3.3.0/kata-static-3.3.0-amd64.tar.xz
+sudo tar --strip-components=3 -xvf /opt/kata/kata.tar.xz -C /opt/kata/
+sudo chmod -R +x /opt/kata/bin
+sudo rm -f /opt/kata/kata.tar.xz
