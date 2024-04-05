@@ -1,0 +1,20 @@
+[Unit]
+Description=Setup thinpool for containerd's devmapper snapshotter
+Wants=lvm2-lvmetad.service
+After=lvm2-lvmetad.service
+Before=containerd.service nodeadm-run.service nodeadm-config.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStartPre=/usr/sbin/wipefs /dev/nvme1n1
+
+ExecStartPre=/usr/sbin/pvcreate -ff -y /dev/nvme1n1
+ExecStartPre=/usr/sbin/vgcreate -f containerd /dev/nvme1n1
+ExecStartPre=/usr/sbin/lvcreate --wipesignatures y -n thinpool containerd -l 95%%VG
+ExecStartPre=/usr/sbin/lvcreate --wipesignatures y -n thinpoolmeta containerd -l 1%%VG
+ExecStartPre=/usr/sbin/lvconvert -y --zero n -c 512K --thinpool containerd/thinpool --poolmetadata containerd/thinpoolmeta
+ExecStart=/usr/sbin/lvchange -y --metadataprofile containerd-thinpool containerd/thinpool
+
+[Install]
+WantedBy=multi-user.target

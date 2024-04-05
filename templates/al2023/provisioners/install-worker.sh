@@ -254,3 +254,29 @@ sudo sed -i \
 # https://github.com/containerd/containerd/issues/8197
 # this was fixed in 1.2.x of libcni but containerd < 2.x are using libcni 1.1.x
 sudo systemctl enable cni-cache-reset
+
+################################################################################
+### Install kata-containers ####################################################
+################################################################################
+
+sudo mkdir /opt/kata
+
+echo "Downloading Kata Containers for ${ARCH}"
+
+if [ "$ARCH" == "amd64" ]; then
+  sudo curl -L -o /opt/kata/kata.tar.xz https://github.com/kata-containers/kata-containers/releases/download/3.3.0/kata-static-3.3.0-amd64.tar.xz
+  sudo cp /etc/containerd/kata-config.amd64.toml /etc/containerd/kata-config.toml
+
+elif [ "$ARCH" == "arm64" ]; then
+  sudo curl -L -o /opt/kata/kata.tar.xz https://github.com/kata-containers/kata-containers/releases/download/3.3.0/kata-static-3.3.0-arm64.tar.xz
+  sudo cp /etc/containerd/kata-config.arm64.toml /etc/containerd/kata-config.toml
+else
+  echo "Unsupported architecture: $ARCH"
+  exit 1
+fi
+
+sudo tar --strip-components=3 -xvf /opt/kata/kata.tar.xz -C /opt/kata/
+sudo chmod -R +x /opt/kata/bin
+sudo rm -f /opt/kata/kata.tar.xz
+
+sudo systemctl enable setup-devmapper.service

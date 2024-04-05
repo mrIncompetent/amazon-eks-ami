@@ -1,0 +1,55 @@
+version = 2
+root = "/var/lib/containerd"
+state = "/run/containerd"
+
+# grpc configuration
+[grpc]
+address = "/run/containerd/containerd.sock"
+
+[plugins]
+[plugins."io.containerd.snapshotter.v1.devmapper"]
+root_path = "/var/lib/containerd/devmapper"
+pool_name = "containerd-thinpool"
+base_image_size = "10GB"
+
+[plugins."io.containerd.grpc.v1.cri".containerd]
+default_runtime_name = "runc"
+discard_unpacked_layers = true
+#snapshotter = "devmapper"
+snapshotter = "overlayfs"
+
+[plugins."io.containerd.grpc.v1.cri".cni]
+bin_dir = "/opt/cni/bin"
+conf_dir = "/etc/cni/net.d"
+
+[plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc]
+runtime_type = "io.containerd.runc.v2"
+[plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc.options]
+SystemdCgroup = true
+
+# Qemu
+[plugins."io.containerd.grpc.v1.cri".containerd.runtimes.kata]
+runtime_type = "io.containerd.kata.v2"
+privileged_without_host_devices = true
+pod_annotations = ["io.katacontainers.*"]
+container_annotations = ["io.katacontainers.*"]
+[plugins."io.containerd.grpc.v1.cri".containerd.runtimes.kata.options]
+ConfigPath = "/etc/kata-containers/amd64/qemu.toml"
+
+# Cloud hypervisor
+[plugins."io.containerd.grpc.v1.cri".containerd.runtimes.kata-clh]
+runtime_type = "io.containerd.kata.v2"
+privileged_without_host_devices = true
+pod_annotations = ["io.katacontainers.*"]
+container_annotations = ["io.katacontainers.*"]
+[plugins."io.containerd.grpc.v1.cri".containerd.runtimes.kata-clh.options]
+ConfigPath = "/etc/kata-containers/amd64/clh.toml"
+
+# Firecracker
+[plugins."io.containerd.grpc.v1.cri".containerd.runtimes.kata-fc]
+runtime_type = "io.containerd.kata.v2"
+privileged_without_host_devices = true
+pod_annotations = ["io.katacontainers.*"]
+container_annotations = ["io.katacontainers.*"]
+[plugins."io.containerd.grpc.v1.cri".containerd.runtimes.kata-fc.options]
+ConfigPath = "/etc/kata-containers/amd64/fc.toml"
